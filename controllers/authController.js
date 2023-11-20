@@ -1,15 +1,15 @@
 const userModel = require('../models/User.js');
-
+let bcrypt = require('bcrypt');
 const signup = async (req, res, next) => {
 
     console.time("authController : signup");
     let { name, email,phone,password } = req.body;
-    console.log(req.body);
+
     email = email.toLowerCase();
     console.log("authController : signup :: email is ", email);
     try {
         const isUserExists = await userModel.findOne({ where: { email: email } });
-        console.log("authController : signup :: isUserExists : ", isUserExists);
+        // console.log("authController : signup :: isUserExists : ", isUserExists);
         // when the user already register.
         if (isUserExists) {
             res.status(409).json({
@@ -18,12 +18,12 @@ const signup = async (req, res, next) => {
                 data: null
             });
         } else {
-            // let saltRound = 10;
-            // let salt = await bcrypt.genSalt(saltRound);
-            // let hashedPassword = await bcrypt.hash(password, salt)
+            let saltRound = 10;
+            let salt = await bcrypt.genSalt(saltRound);
+            let hashedPassword = await bcrypt.hash(password, salt)
 
             let userResponse = await userModel.create({
-                    name,email,phone,password,
+                    name,email,phone,password:hashedPassword,
                 })
 
             if(userResponse){
@@ -37,6 +37,7 @@ const signup = async (req, res, next) => {
         }
     } catch (err) {
         next(err)
+        console.log(err);
     } finally {
         console.timeEnd("authController : signup");
     }

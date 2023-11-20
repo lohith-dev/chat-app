@@ -33,6 +33,9 @@
                 margin: auto;
 
             }
+            #successmsg{
+                display: none;
+            }
             #sub-button{
                 margin-top: 15px;
                 border-radius: 5px;
@@ -144,7 +147,12 @@
               
                 
 }
-
+function showSuccess(errorMessage) {
+    const errorElement = document.getElementById('successmsg');
+    const errorEle = document.getElementById('message');
+    errorEle.innerText = errorMessage; // Set the error message content
+    errorElement.style.display = 'block'; // Show the error alert
+}
 function showError(errorMessage) {
     const errorElement = document.getElementById('error');
     const errorEle = document.getElementById('message');
@@ -175,10 +183,14 @@ function showError(errorMessage) {
             }else{
                
                 try{
-                   let {data}= await axios.post('http://localhost:8000/auth/signup',loginData);
-                   console.log(data);
+                   let data= await axios.post('http://localhost:8000/auth/signup',loginData);
+                   
                     if(data.status===200){
-                        window.location.href = 'login.html';  
+                        showSuccess(data.data.message);
+                        setTimeout(()=>{
+                            window.location.href = 'login.html';  
+                        },2000)
+                        
                     }
                 }catch(err){
                     showError(err.response.data.message)
@@ -213,6 +225,12 @@ function showError(errorMessage) {
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div> -->
+              <div class="alert alert-success alert-success fade show" id="successmsg" role="alert">
+                <div class="d-flex justify-content-between align-items-center">
+                     <strong id="message"></strong> 
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>      
+              </div>
 
               <div class="alert alert-warning alert-danger fade show" id="error" role="alert">
                 <div class="d-flex justify-content-between align-items-center">

@@ -12,7 +12,9 @@ const app = express();
 const userRouter = require('./routes/userRouter.js');
 const errorController = require('./controllers/error');
 
-app.use(cors());
+app.use(cors({
+    origin:'null'
+}));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 

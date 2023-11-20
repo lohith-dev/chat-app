@@ -135,12 +135,12 @@ function showError(errorMessage) {
             // }else{
                
                 try{
-                   let data= await axios.post('http://35.153.102.208:8000/auth/signin',loginData);
+                   let data= await axios.post('http://localhost:8000/auth/signin',loginData);
                    console.log(data.data);
                     if(data.status===200){
                         alert(data.data.message)
-                       localStorage.setItem('token',JSON.stringify(data.data.token));
-                        window.location.href = 'expense.html';
+                        localStorage.setItem('token',JSON.stringify(data.data.token));
+                        window.location.href = 'chatapp.html';
                     }
                 }catch(err){
                     showError(err.response.data.message)
@@ -158,7 +158,7 @@ function showError(errorMessage) {
     <form novalidate onSubmit="return handleSubmit(event)">
 
         <div id="header">
-          <h1>Expense Tracker</h1>
+          <h1>Group Chat App</h1>
           <h1>Login</h1>
         </div>
         

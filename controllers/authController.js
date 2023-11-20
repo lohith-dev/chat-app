@@ -50,11 +50,12 @@ let signin = async (req, res, next)=>{
     console.time("authController : signup");
     let {email,password } = req.body;
     email = email.toLowerCase();
+    console.log(req.body);
     console.log("authController : signup :: email is ", email);
     try {
         const UserData = await userModel.findOne({ where: { email: email } });
         // when the user already register.
-        console.log(UserData.password);
+        
         if (UserData) {
             let {id,name,email}=UserData;
             // console.log("ddddddddddffffffff",UserData);
@@ -69,7 +70,7 @@ let signin = async (req, res, next)=>{
                     token: token
                 });    
             }else{
-                res.status(404).json({
+                res.status(401).json({
                     error: true,
                     message: "Invalid Password",
                     data: null

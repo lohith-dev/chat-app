@@ -11,6 +11,7 @@ const app = express();
 
 const userRouter = require('./routes/userRouter.js');
 const errorController = require('./controllers/error');
+const msgRouter = require('./routes/msgRouter.js')
 
 app.use(cors({
     origin:'null'
@@ -26,6 +27,7 @@ app.use(express.json());
 
 
 app.use('/auth', userRouter);
+app.use('/msg', msgRouter);
 
 
 app.use(errorController.get404);

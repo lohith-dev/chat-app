@@ -24,7 +24,47 @@
             }
         </style>
         <body >
+                    <script>
+                        
+                  window.onload =()=>{
 
+                    const form =document.querySelector("form");
+                    const buton =document.querySelector("subut");
+                    form.addEventListener('submit', e=>{
+                        if(!form.checkValidity()){
+                            e.preventDefault()
+                        }
+                        form.classList.add('was-validated')
+                    })
+
+                    
+                        
+                    }
+
+    async function handleSubmit(event) {
+            event.preventDefault(); 
+
+            const msg = document.getElementById('chatmsg').value;
+            console.log(msg);
+        
+
+            let msgData ={
+                    message:msg,
+            }
+            const token = JSON.parse(localStorage.getItem('token'));
+         
+                try{
+                   let data= await axios.post('http://localhost:8000/msg',msgData,{headers:{"Authorization":token}});
+                    console.log(data);
+                }catch(err){
+                    showError(err.response.data.message)
+
+                }
+                
+
+            }
+
+                    </script>
            
                 <div class="container chatcont" >
                     <!-- <div class="chat"> -->
@@ -33,16 +73,18 @@
                 </div>
                 <footer class=" text-lg-start bg-body-tertiary text-muted ">
                     <section class="d-flex footr justify-content-center align-items-center p-4 border-bottom">
-                 
+                    <form novalidate onSubmit="return handleSubmit(event)">
                        <div class="d-flex chatsend">
-                        <div class="form-group flex-grow-1">
-                            <!-- <label for="exampleInputEmail1">Email address</label> -->
-                            <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter the message">
-                            <!-- <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small> -->
-                          </div>
-                        <input type="submit"  id ="sub-button" class="subut" value="Send">
+                      
+                            <div class="form-group flex-grow-1">
+                                <!-- <label for="exampleInputEmail1">Email address</label> -->
+                                <input type="email" class="form-control" id="chatmsg" aria-describedby="emailHelp" placeholder="Enter the message">
+                                <!-- <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small> -->
+                            </div>
+                            <input type="submit"  id ="sub-button" class="subut" value="Send">
+                      
                        </div>
-               
+                    </form>
                     </section>
                 </footer>
             

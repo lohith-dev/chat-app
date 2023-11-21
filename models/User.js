@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const sequelize  = require('../util/database');
+const Chatmsg = require('../models/Chat.js')
 
 
 const User = sequelize.define('User',{
@@ -33,6 +34,7 @@ const User = sequelize.define('User',{
     underscored: true
 })
 
-
+User.hasMany(Chatmsg);  
+Chatmsg.belongsTo(User);
 
 module.exports = User;

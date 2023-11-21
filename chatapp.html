@@ -43,7 +43,7 @@
         const display=(data)=>{
             const parentDiv = document.getElementById('chatmessage');
             parentDiv.innerHTML='';
-            data.chat.forEach((chat, index) => {
+            data.forEach((chat, index) => {
                             const parentDiv = document.getElementById('chatmessage');
 
                             const childParagraph = document.createElement('li');
@@ -52,6 +52,42 @@
                             parentDiv.appendChild(childParagraph);
                           
                         });
+              }
+
+              async function showChatHistory(){
+
+                    try{
+                        let savingChats
+                        const chats = localStorage.getItem('chatHistory');
+                    console.log(typeof chats);
+                       if(chats !== "undefined" && chats !== null){
+                            console.log("gg");
+                            const parsedChatHistory = JSON.parse(chats);
+                            const latestStoredTimestamp = parsedChatHistory.length > 0 ? parsedChatHistory[parsedChatHistory.length - 1].date_time : 0;
+                        
+                            let data= await axios.get(`http://localhost:8000/msg?timestamp=${latestStoredTimestamp}`,{headers:{"Authorization":token}});
+                            console.log(data.data.chat.length);
+                            let slicedData=parsedChatHistory.slice(data.data.chat.length)
+                            const apiChats = data.data.chat
+                            const mergedChats = [...slicedData, ...apiChats];
+                            savingChats = mergedChats.slice(-1000);
+                      
+                       }else{
+                        
+                        let data= await axios.get(`http://localhost:8000/msg?timestamp=${0}`,{headers:{"Authorization":token}});
+                        // console.log(data.data.chat);
+                        savingChats = data.data.chat;
+                       }
+                       localStorage.setItem("chatHistory", JSON.stringify(savingChats));
+                       console.log(savingChats);
+                         
+                        display(savingChats)
+                         
+                         
+                        }catch(err){
+                            console.log(err);
+
+                    }
               }
 
             const token = JSON.parse(localStorage.getItem('token'));               
@@ -65,19 +101,20 @@
                         }
                         form.classList.add('was-validated')
                     })
-                  setInterval(async ()=>{
-                    try{
-                        let data= await axios.get('http://localhost:8000/msg',{headers:{"Authorization":token}});
-                        console.log(data);
-                            if(data.status===200){
-                                display(data.data)
-                            }
-                        }catch(err){
-                            console.log(err);
+                //   setInterval(async ()=>{
+                //     try{
+                //         let data= await axios.get('http://localhost:8000/msg',{headers:{"Authorization":token}});
+                //         console.log(data);
+                //             if(data.status===200){
+                //                 display(data.data)
+                //             }
+                //         }catch(err){
+                //             console.log(err);
 
-                        }
-                  },1000)
-                
+                //         }
+                //   },1000)
+                     
+                showChatHistory();
                     
                         
             }

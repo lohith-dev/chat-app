@@ -40,10 +40,12 @@
       
          <script>
 
-              const display=(data)=>{
-                console.log(data.chat);
-                data.chat.forEach((chat, index) => {
+        const display=(data)=>{
+            const parentDiv = document.getElementById('chatmessage');
+            parentDiv.innerHTML='';
+            data.chat.forEach((chat, index) => {
                             const parentDiv = document.getElementById('chatmessage');
+
                             const childParagraph = document.createElement('li');
                             childParagraph.classList.add('list-group-item');
                             childParagraph.textContent = `${chat.message}`;
@@ -63,6 +65,7 @@
                         }
                         form.classList.add('was-validated')
                     })
+                  setInterval(async ()=>{
                     try{
                         let data= await axios.get('http://localhost:8000/msg',{headers:{"Authorization":token}});
                         console.log(data);
@@ -73,6 +76,7 @@
                             console.log(err);
 
                         }
+                  },1000)
                 
                     
                         
@@ -88,8 +92,7 @@
             let msgData ={
                     message:msg,
             }
-         
-         
+
                 try{
                    let data= await axios.post('http://localhost:8000/msg',msgData,{headers:{"Authorization":token}});
                     console.log(data);
@@ -105,7 +108,7 @@
            
                 <div class="container chatcont" >
                     <!-- <div class="chat"> -->
-                       <div class="chatbox">
+                       <div class="chatbox ">
                         <div class="header">
                             <h2>Welcome to chat app</h2>
                         </div>

@@ -16,17 +16,44 @@
                  display: flex;
                  justify-content: center;
             }
+            .list-group-item{
+                border: none;
+            }
+            .header{
+                text-align: center;
+            }
+            .chatbox{
+                width: 500px;
+            }
             .footcont{
                  min-height:50px
+            }
+            .list-group-item:nth-child(even) {
+                background-color: #f0f0f0; /* Set the background color for even items */
             }
             .chatsend{
                 width: 500px;
             }
         </style>
         <body >
-                    <script>
-                        
-                  window.onload =()=>{
+
+      
+         <script>
+
+              const display=(data)=>{
+                console.log(data.chat);
+                data.chat.forEach((chat, index) => {
+                            const parentDiv = document.getElementById('chatmessage');
+                            const childParagraph = document.createElement('li');
+                            childParagraph.classList.add('list-group-item');
+                            childParagraph.textContent = `${chat.message}`;
+                            parentDiv.appendChild(childParagraph);
+                          
+                        });
+              }
+
+            const token = JSON.parse(localStorage.getItem('token'));               
+                  window.onload =async()=>{
 
                     const form =document.querySelector("form");
                     const buton =document.querySelector("subut");
@@ -36,10 +63,20 @@
                         }
                         form.classList.add('was-validated')
                     })
+                    try{
+                        let data= await axios.get('http://localhost:8000/msg',{headers:{"Authorization":token}});
+                        console.log(data);
+                            if(data.status===200){
+                                display(data.data)
+                            }
+                        }catch(err){
+                            console.log(err);
 
+                        }
+                
                     
                         
-                    }
+            }
 
     async function handleSubmit(event) {
             event.preventDefault(); 
@@ -51,7 +88,7 @@
             let msgData ={
                     message:msg,
             }
-            const token = JSON.parse(localStorage.getItem('token'));
+         
          
                 try{
                    let data= await axios.post('http://localhost:8000/msg',msgData,{headers:{"Authorization":token}});
@@ -68,7 +105,15 @@
            
                 <div class="container chatcont" >
                     <!-- <div class="chat"> -->
-                        <h2>Welcome to chat app</h2>
+                       <div class="chatbox">
+                        <div class="header">
+                            <h2>Welcome to chat app</h2>
+                        </div>
+                        <ul class="list-group" id="chatmessage">
+    
+                            <!-- Add more list items as needed -->
+                        </ul>
+                       </div>
                     <!-- </div> -->
                 </div>
                 <footer class=" text-lg-start bg-body-tertiary text-muted ">

@@ -5,7 +5,12 @@ const express = require('express');
 const chatController = require('../controllers//chatController.js');
 
 const router = express.Router();
-const {authenticate}=require('../middleware/authentication.js')
+
+const {authenticate}=require('../middleware/authentication.js');
+
+
+
+router.get('/',authenticate,chatController.getMessages)
 
 router.post('/',authenticate,chatController.createMessage)
 

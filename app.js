@@ -4,6 +4,7 @@ var cors = require('cors')
 const fs =require('fs');
 const path =require('path');
 
+
 require('dotenv').config();
 
 const sequelize = require('./util/database');
@@ -11,7 +12,9 @@ const app = express();
 
 const userRouter = require('./routes/userRouter.js');
 const errorController = require('./controllers/error');
-const msgRouter = require('./routes/msgRouter.js')
+const msgRouter = require('./routes/msgRouter.js');
+const grouppRouter = require('./routes/groupRouter.js');
+const grpchatRouter = require('./routes/groupChatRouter.js');
 
 app.use(cors({
     origin:'null'
@@ -28,9 +31,13 @@ app.use(express.json());
 
 app.use('/auth', userRouter);
 app.use('/msg', msgRouter);
-
+app.use('/group',grouppRouter)
+app.use('/grpchat',grpchatRouter)
 
 app.use(errorController.get404);
+
+
+
 // {force:true}
 const PORT = process.env.PORT || 3000;
 sequelize.sync().then(result=>{

@@ -36,6 +36,7 @@ const createMessage =async (req, res, next) => {
         const data= await msgModel.create({
             message,isImage:false,UserId:req.user.id
         })
+        return res.status(200).json({ message: "Successful" })
     } catch (err) {
         next(err)
         console.log(err);

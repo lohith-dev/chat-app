@@ -1,5 +1,6 @@
 const grpChatModel=require('../models/GropChat');
 const groupModel = require('../models/Group.js');
+const userModel = require('../models/User.js');
 const Sequelize = require('sequelize');
 
 
@@ -20,10 +21,13 @@ const getgrpMessages = async (req,res,next)=>{
                 date_time: {
                   [Sequelize.Op.gt]: new Date(lastTimestamp) // Retrieve messages created after the provided timestamp
                 },
-                
               },
-             order: [['date_time', 'DESC']], 
-            limit: 10
+            order: [['date_time', 'DESC']], 
+            limit: 10,
+            include:[{
+                model: userModel,
+                attributes: ['id', 'name'],
+            }]
         });
         const reversedResult=chatHistories.reverse();
         return res.status(200).json({ chat: reversedResult, message: "User chat History Fetched" })

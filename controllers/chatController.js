@@ -1,5 +1,6 @@
 const msgModel=require('../models/Chat.js');
 const Sequelize = require('sequelize');
+const userModel = require('../models/User.js');
 
 
 const getMessages = async (req,res,next)=>{
@@ -14,8 +15,13 @@ const getMessages = async (req,res,next)=>{
                 },
                 
               },
+
               order: [['date_time', 'DESC']], 
-            limit: 10
+            limit: 10,
+            include:[{
+                model: userModel,
+                attributes: ['id', 'name'],
+            }]
         });
         const reversedResult=chatHistories.reverse();
         return res.status(200).json({ chat: reversedResult, message: "User chat History Fetched" })

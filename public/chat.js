@@ -350,6 +350,7 @@ async function displayUsers (e){
 
 
 document.addEventListener("DOMContentLoaded", function() {
+    showChatHistory();
     document.getElementById('createGroup').addEventListener('click',displayUsers);
     
     document.getElementById('group-btn').addEventListener('click',createGroup);

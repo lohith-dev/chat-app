@@ -21,18 +21,18 @@ app.use(cors({
 }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
-
-
-
 app.use(express.json());
-
-
 
 app.use('/auth', userRouter);
 app.use('/msg', msgRouter);
 app.use('/group',grouppRouter)
 app.use('/grpchat',grpchatRouter)
+
+app.use((req,res)=>{
+    console.log("reqqqq");
+    res.sendFile(path.join(__dirname,`public${req.url}`))
+})
+
 
 app.use(errorController.get404);
 

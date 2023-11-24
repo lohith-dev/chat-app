@@ -2,7 +2,17 @@ console.log("hello");
 
 
 
-const tokenjwt = JSON.parse(localStorage.getItem('token'));   
+const tokenjwt = JSON.parse(localStorage.getItem('token'));  
+
+function parseJwt (token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+}
 
 async function showgrpChatHelper(){
     let savingChats;    
@@ -31,6 +41,97 @@ async function showgrpChatHelper(){
     }
 }
 
+async function checkAdmin(itemId){
+    const tokenData = parseJwt(tokenjwt);
+    console.log("tokenn",tokenData);
+    try{
+        const {data} = await axios.get(`http://localhost:8000/group/${itemId}?admin=${true}`,{headers:{"Authorization":tokenjwt}});
+      
+       if(data.group.AdminId==tokenData.id){
+             return true;
+        }
+    }catch(err){
+        console.log(err);
+    }
+    return false
+}
+
+
+async function editGroup(e){
+    // console.log("oppppppppppppp",e.target.getAttribute('gropId'));
+    // console.log();
+    const groupId = document.getElementById('editGroup').getAttribute('gropId');
+    const editItemIdInput = document.getElementById('editGroupId');
+    editItemIdInput.value = groupId;
+    
+    try{
+        // let users= await axios.get(`http://localhost:8000/auth/users`,{headers:{"Authorization":token}});
+        let {data}= await axios.get(`http://localhost:8000/group/${groupId}`,{headers:{"Authorization":tokenjwt}});
+        // let allUsers=users.data.users;
+        // let groupUsers=data.group[0].Users;
+        // let noncheckuser = [];
+        // console.log(allUsers);
+        // console.log(groupUsers);
+        // allUsers.forEach(user=>{
+        //     for (let index = 0; index < groupUsers.length; index++) {
+        //             if(user.name!==groupUsers[index].name){
+        //                 noncheckuser.push(user);
+        //             }
+                
+        //     }
+        // })
+        // data.group.forEach()
+   
+        // const nonmembers=data.group.filter(check=>check.member===false)
+
+        document.getElementById('groupName').value=data.gropName;
+        document.getElementById('exampleModalLabel').innerHTML='';
+        document.getElementById('exampleModalLabel').innerHTML="Update Group";
+        document.getElementById('group-btn').innerHTML='';
+        document.getElementById('group-btn').innerHTML="Update Group";
+        const parentDiv = document.getElementById('showUsers');
+        parentDiv.innerHTML='';
+        data.group.forEach((user) => {
+            if(user.member){
+                const childParagraph = document.createElement('p');
+                const tag= user.name.slice(0, 2);
+                childParagraph.setAttribute('data-letters',tag.toUpperCase());
+                childParagraph.classList.add('userlist');
+                childParagraph.textContent = `${user.name}`;
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = true;
+                checkbox.setAttribute('value', user.id);
+                checkbox.setAttribute('name', "users");
+                checkbox.classList.add('form-check-inline');
+                childParagraph.append(checkbox)
+                parentDiv.appendChild(childParagraph);
+          
+            }else{
+                const parentDiv = document.getElementById('showUsers');
+                const childParagraph = document.createElement('p');
+                const tag= user.name.slice(0, 2);
+                
+                childParagraph.setAttribute('data-letters',tag.toUpperCase());
+                childParagraph.classList.add('userlist');
+                childParagraph.textContent = `${user.name}`;
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.setAttribute('value', user.id);
+                checkbox.setAttribute('name', "users");
+                checkbox.classList.add('form-check-inline');
+                childParagraph.append(checkbox)
+                parentDiv.appendChild(childParagraph);
+            }
+          
+        });
+
+        // displayModalUser(nonmembers);
+        
+    }catch(err){
+        console.log(err);
+    }
+}
 
 async function showGroupChat(e){
     const listItem = e.target.closest('li');
@@ -39,7 +140,8 @@ async function showGroupChat(e){
     const chatsubmit = document.getElementById('sub-button');  
     const grouptitle = document.getElementById('titleheader');
     chatsubmit.setAttribute('data-id',itemId);
-   const localGrpId=localStorage.getItem('groupId');
+    const localGrpId=localStorage.getItem('groupId');
+    const isAdmin= await checkAdmin(itemId)
    let messageText = "";   
 
     try{
@@ -50,19 +152,31 @@ async function showGroupChat(e){
             localStorage.setItem("groupId", JSON.stringify(itemId));
             // grouptitle.innerHTML='';
             // grouptitle.innerHTML = `${targetElement.querySelector('.grpNameTag span').innerHTML} Group`
-            messageText+=`      
-            <div class="d-flex">
-                    <div class="flex-grow-1"> ${listItem.querySelector('.grpNameTag').firstChild.textContent.trim()} Group </div>
-                    <div> ${listItem.querySelector('.grpNameTag span').innerHTML}  </div>
-                  <button class="btn btn-primary" id="editGroup" gropId="${itemId}">
-                     <i class="bi-pen" ></i>Edit
-                  </button>
-
-            </div>
-                `
+            if(isAdmin){
+                messageText+=`      
+                <div class="d-flex">
+                        <div class="flex-grow-1"> ${listItem.querySelector('.grpNameTag').firstChild.textContent.trim()} Group </div>
+                        <div> ${listItem.querySelector('.grpNameTag span').innerHTML}  </div>
+                      <button class="btn btn-primary" id="editGroup" gropId="${itemId}" data-bs-toggle="modal"  data-bs-target="#exampleModal">
+                         <i class="bi-pen" ></i>Edit
+                      </button>
+    
+                     
+                </div>
+                    `
+            }else{
+                messageText+=`      
+                <div class="d-flex">
+                        <div class="flex-grow-1"> ${listItem.querySelector('.grpNameTag').firstChild.textContent.trim()} Group </div>
+                        <div> ${listItem.querySelector('.grpNameTag span').innerHTML}  </div>
+                </div>
+                    `
+            }
+            
             savingChats = data.chat;
             grouptitle.innerHTML=messageText;
             display(savingChats);
+        
             
         }else{
             showgrpChatHelper();
@@ -73,20 +187,12 @@ async function showGroupChat(e){
     }catch(err){
         console.log(err);
     }
-
-    document.getElementById('editGroup').addEventListener('click',editGroup)
-}
-async function editGroup(e){
-    // console.log("oppppppppppppp",e.target.getAttribute('gropId'));
-    // console.log();
-    const groupId = document.getElementById('editGroup').getAttribute('gropId');
-    try{
-        let {data}= await axios.get(`http://localhost:8000/group/${groupId}`,{headers:{"Authorization":tokenjwt}});
-        console.log(data);
-    }catch(err){
-
+    if(isAdmin){
+        document.getElementById('editGroup').addEventListener('click',editGroup)
     }
+    
 }
+
 async function showGroupsfun(){
     const parentDiv = document.getElementById('showGroupsList');
     parentDiv.innerHTML='';
@@ -125,28 +231,39 @@ async function showGroupsfun(){
     }
 }
 
+function displayModalUser(data){
+    const parentDiv = document.getElementById('showUsers');
+    parentDiv.innerHTML='';
+     data.forEach((user) => {
+            const parentDiv = document.getElementById('showUsers');
+            const childParagraph = document.createElement('p');
+            const tag= user.name.slice(0, 2);
+            
+            childParagraph.setAttribute('data-letters',tag.toUpperCase());
+            childParagraph.classList.add('userlist');
+            childParagraph.textContent = `${user.name}`;
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.setAttribute('value', user.id);
+            checkbox.setAttribute('name', "users");
+            checkbox.classList.add('form-check-inline');
+            childParagraph.append(checkbox)
+            parentDiv.appendChild(childParagraph);
+          
+        });
+}
+
 async function displayUsers (e){
+    document.getElementById('exampleModalLabel').innerHTML='';
+    document.getElementById('exampleModalLabel').innerHTML="Create New Group";
+    document.getElementById('group-btn').innerHTML='';
+    document.getElementById('group-btn').innerHTML="Create Group";
+    document.getElementById('groupName').value='';
+    const editItemIdInput = document.getElementById('editGroupId');
+    editItemIdInput.removeAttribute('value');
     try{
         let {data}= await axios.get(`http://localhost:8000/auth/users`,{headers:{"Authorization":token}});
-        const parentDiv = document.getElementById('showUsers');
-        parentDiv.innerHTML='';
-         data.users.forEach((user) => {
-                const parentDiv = document.getElementById('showUsers');
-                const childParagraph = document.createElement('p');
-                const tag= user.name.slice(0, 2);
-                
-                childParagraph.setAttribute('data-letters',tag.toUpperCase());
-                childParagraph.classList.add('userlist');
-                childParagraph.textContent = `${user.name}`;
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.setAttribute('value', user.id);
-                checkbox.setAttribute('name', "users");
-                checkbox.classList.add('form-check-inline');
-                childParagraph.append(checkbox)
-                parentDiv.appendChild(childParagraph);
-              
-            });
+        displayModalUser(data.users) 
     }catch(err){
         console.log(err);
     }
@@ -154,39 +271,92 @@ async function displayUsers (e){
 
 
   async function createGroup(){
-                
-    const groupname= document.getElementById('groupName').value;
-    const user_list = document.getElementById('showUsers')
-    console.log(user_list);
-    const groupUsers = Array.from(user_list.querySelectorAll('input[name="users"]:checked')).map(checkbox => checkbox.value);
-   
-    const Grpdata = {
-        name: groupname,
-        numberOfMembers: groupUsers.length + 1,
-        membersIds: groupUsers
-     } 
-     console.log(token); 
-    try{
-        let {data}= await axios.post(`http://localhost:8000/group`,Grpdata,{headers:{"Authorization":token}});
-        if(data){
-            showGroupsfun();
-        }
+
+    const editItemIdInput = document.getElementById('editGroupId');
+   console.log("asds",editItemIdInput.value );
+
+   if(!editItemIdInput.value){
+        const groupname= document.getElementById('groupName').value;
+        const user_list = document.getElementById('showUsers')
+        console.log(user_list);
+        const groupUsers = Array.from(user_list.querySelectorAll('input[name="users"]:checked')).map(checkbox => checkbox.value);
     
-    }catch(err){
-        console.log(err);
-    }
+        const Grpdata = {
+            name: groupname,
+            numberOfMembers: groupUsers.length + 1,
+            membersIds: groupUsers
+        } 
+        console.log(token); 
+        try{
+            let {data}= await axios.post(`http://localhost:8000/group`,Grpdata,{headers:{"Authorization":token}});
+            if(data){
+                showGroupsfun();
+            }
+        
+        }catch(err){
+            console.log(err);
+        }
+   }else{
+            const groupname= document.getElementById('groupName').value;
+            const user_list = document.getElementById('showUsers')
+            console.log(user_list);
+            const groupUsers = Array.from(user_list.querySelectorAll('input[name="users"]:checked')).map(checkbox => checkbox.value);
+
+            const Grpdata = {
+                name: groupname,
+                numberOfMembers: groupUsers.length + 1,
+                membersIds: groupUsers
+            } 
+            console.log(token); 
+            try{
+                let {data}= await axios.put(`http://localhost:8000/group/${editItemIdInput.value}`,Grpdata,{headers:{"Authorization":token}});
+                if(data){
+                    showGroupsfun();
+                }
+            
+            }catch(err){
+                console.log(err);
+            }
+   }
+    
   }
 
+
+//   async function UpdateGroup(){
+                
+//     const groupname= document.getElementById('groupName').value;
+//     const user_list = document.getElementById('showUsers')
+//     console.log(user_list);
+//     const groupUsers = Array.from(user_list.querySelectorAll('input[name="users"]:checked')).map(checkbox => checkbox.value);
+   
+//     const Grpdata = {
+//         name: groupname,
+//         numberOfMembers: groupUsers.length + 1,
+//         membersIds: groupUsers
+//      } 
+//      console.log(token); 
+//     try{
+//         let {data}= await axios.post(`http://localhost:8000/group`,Grpdata,{headers:{"Authorization":token}});
+//         if(data){
+//             showGroupsfun();
+//         }
+    
+//     }catch(err){
+//         console.log(err);
+//     }
+//   }
 
 
 
 
 document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('createGroup').addEventListener('click',displayUsers);
+    
     document.getElementById('group-btn').addEventListener('click',createGroup);
 
-   document.getElementById('showGroupsList').addEventListener('click',showGroupChat)
-
+    document.getElementById('showGroupsList').addEventListener('click',showGroupChat)
+  
+    
 
     showGroupsfun();
 });

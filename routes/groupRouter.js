@@ -16,7 +16,7 @@ router.get('/:id',authenticate,chatController.getEditGroup);
 
 router.post('/',authenticate,chatController.creatGroups);
 
-router.put('/:id',authenticate,chatController.UpdateGroup);
+router.put('/:groupId',authenticate,chatController.UpdateGroup);
 
 
 

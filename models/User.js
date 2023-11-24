@@ -57,5 +57,5 @@ GropChat.belongsTo(GroupsModel);
 
 // GroupsModel.hasOne(GropChat);
 // GropChat.belongsTo(GroupsModel);
-console.log(GroupsModel.associations)
+// console.log(GroupsModel.associations)
 module.exports = User;

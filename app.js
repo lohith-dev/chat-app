@@ -1,14 +1,18 @@
 const express = require('express');
+const { createServer } = require("http");
 const bodyParser = require('body-parser');
 var cors = require('cors')
 const fs =require('fs');
 const path =require('path');
-
+const { Server } = require("socket.io");
+const { instrument } = require('@socket.io/admin-ui');
 
 require('dotenv').config();
 
 const sequelize = require('./util/database');
 const app = express();
+
+const websocketService = require('./services/websocket.js');
 
 const userRouter = require('./routes/userRouter.js');
 const errorController = require('./controllers/error');
@@ -17,11 +21,13 @@ const grouppRouter = require('./routes/groupRouter.js');
 const grpchatRouter = require('./routes/groupChatRouter.js');
 
 app.use(cors({
-    origin:'null'
+    origin: '*',
 }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.json());
+
+
 
 app.use('/auth', userRouter);
 app.use('/msg', msgRouter);
@@ -36,12 +42,30 @@ app.use((req,res)=>{
 
 app.use(errorController.get404);
 
+const httpServer = createServer(app);
 
+ const io = new Server(httpServer, {
+    cors: {
+      origin: ["null","https://admin.socket.io"],
+      credentials: true
+    }
+  });
+
+io.on('connection',(socket)=>{
+    socket.on('new-common-message', ()=> {
+            io.emit('common-message',"new common message recieved");
+    })
+    socket.on('new-group-message', ()=> {
+            io.emit('group-message');
+    })
+})
+
+instrument(io, { auth: false })
 
 // {force:true}
 const PORT = process.env.PORT || 3000;
 sequelize.sync().then(result=>{
-    app.listen(PORT,()=>{
+    httpServer.listen(PORT,()=>{
         console.log(`Server is running on port ${PORT} `);
     });
 })

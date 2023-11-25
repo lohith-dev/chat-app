@@ -8,7 +8,7 @@ const getMessages = async (req,res,next)=>{
         const lastTimestamp = req.query.timestamp || 0;
         console.log(lastTimestamp);
         const user = req.user;
-        const chatHistories = await user.getChatmsgs({
+        const chatHistories = await msgModel.findAll({
             where: {
                 date_time: {
                   [Sequelize.Op.gt]: new Date(lastTimestamp) // Retrieve messages created after the provided timestamp

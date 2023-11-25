@@ -1,6 +1,17 @@
-console.log("hello");
+const socket = io("http://localhost:8000");
+    console.log(window.location.origin);
+    socket.on('connect', () => {
+         console.log(`You connected with id:${socket.id}`);
 
-
+    })
+    socket.on('common-message', () => {
+        console.log("commonnnnnnnnnnnnnnnnnnnnnnnn");
+        showChatHistory();
+    })
+    socket.on('group-message', () => {
+        console.log("groupppppppppppppppppppppppp");
+        showgrpChatHelper()
+    })
 
 const tokenjwt = JSON.parse(localStorage.getItem('token'));  
 
@@ -25,7 +36,7 @@ async function showgrpChatHelper(){
             const parsedChatHistory = JSON.parse(chats);
             const latestStoredTimestamp = parsedChatHistory.length > 10 ? parsedChatHistory[parsedChatHistory.length - 1].date_time : 0;
         
-            let {data}= await axios.get(`http://35.153.102.208:8000/grpchat/${localGrpId}?timestamp=${latestStoredTimestamp}`,{headers:{"Authorization":token}});
+            let {data}= await axios.get(`http://localhost:8000/grpchat/${localGrpId}?timestamp=${latestStoredTimestamp}`,{headers:{"Authorization":token}});
             console.log(data.chat);
             let slicedData=parsedChatHistory.slice(data.chat.length)
             const apiChats = data.chat
@@ -45,7 +56,7 @@ async function checkAdmin(itemId){
     const tokenData = parseJwt(tokenjwt);
     console.log("tokenn",tokenData);
     try{
-        const {data} = await axios.get(`http://35.153.102.208:8000/group/${itemId}?admin=${true}`,{headers:{"Authorization":tokenjwt}});
+        const {data} = await axios.get(`http://localhost:8000/group/${itemId}?admin=${true}`,{headers:{"Authorization":tokenjwt}});
       
        if(data.group.AdminId==tokenData.id){
              return true;
@@ -65,8 +76,8 @@ async function editGroup(e){
     editItemIdInput.value = groupId;
     
     try{
-        // let users= await axios.get(`http://35.153.102.208:8000/auth/users`,{headers:{"Authorization":token}});
-        let {data}= await axios.get(`http://35.153.102.208:8000/group/${groupId}`,{headers:{"Authorization":tokenjwt}});
+        // let users= await axios.get(`http://localhost:8000/auth/users`,{headers:{"Authorization":token}});
+        let {data}= await axios.get(`http://localhost:8000/group/${groupId}`,{headers:{"Authorization":tokenjwt}});
         // let allUsers=users.data.users;
         // let groupUsers=data.group[0].Users;
         // let noncheckuser = [];
@@ -142,13 +153,13 @@ async function showGroupChat(e){
     chatsubmit.setAttribute('data-id',itemId);
     const localGrpId=localStorage.getItem('groupId');
     const isAdmin= await checkAdmin(itemId)
-   let messageText = "";   
+    let messageText = "";   
 
     try{
         let savingChats
         if(!localGrpId || itemId!==localGrpId){
             console.log("lllllllllllllllllllll");
-            let {data}= await axios.get(`http://35.153.102.208:8000/grpchat/${itemId}`,{headers:{"Authorization":tokenjwt}});
+            let {data}= await axios.get(`http://localhost:8000/grpchat/${itemId}`,{headers:{"Authorization":tokenjwt}});
             localStorage.setItem("groupId", JSON.stringify(itemId));
             // grouptitle.innerHTML='';
             // grouptitle.innerHTML = `${targetElement.querySelector('.grpNameTag span').innerHTML} Group`
@@ -157,11 +168,9 @@ async function showGroupChat(e){
                 <div class="d-flex">
                         <div class="flex-grow-1"> ${listItem.querySelector('.grpNameTag').firstChild.textContent.trim()} Group </div>
                         <div> ${listItem.querySelector('.grpNameTag span').innerHTML}  </div>
-                      <button class="btn btn-primary" id="editGroup" gropId="${itemId}" data-bs-toggle="modal"  data-bs-target="#exampleModal">
-                         <i class="bi-pen" ></i>Edit
-                      </button>
-    
-                     
+                        <button class="btn btn-primary" id="editGroup" gropId="${itemId}" data-bs-toggle="modal"  data-bs-target="#exampleModal">
+                            <i class="bi-pen" ></i>Edit
+                        </button>  
                 </div>
                     `
             }else{
@@ -197,7 +206,7 @@ async function showGroupsfun(){
     const parentDiv = document.getElementById('showGroupsList');
     parentDiv.innerHTML='';
     try{
-        let {data}= await axios.get(`http://35.153.102.208:8000/group`,{headers:{"Authorization":tokenjwt}});
+        let {data}= await axios.get(`http://localhost:8000/group`,{headers:{"Authorization":tokenjwt}});
        
         data.groups[0].Groups.forEach((grp) => {
             
@@ -262,7 +271,7 @@ async function displayUsers (e){
     const editItemIdInput = document.getElementById('editGroupId');
     editItemIdInput.removeAttribute('value');
     try{
-        let {data}= await axios.get(`http://35.153.102.208:8000/auth/users`,{headers:{"Authorization":token}});
+        let {data}= await axios.get(`http://localhost:8000/auth/users`,{headers:{"Authorization":token}});
         displayModalUser(data.users) 
     }catch(err){
         console.log(err);
@@ -288,7 +297,7 @@ async function displayUsers (e){
         } 
         console.log(token); 
         try{
-            let {data}= await axios.post(`http://35.153.102.208:8000/group`,Grpdata,{headers:{"Authorization":token}});
+            let {data}= await axios.post(`http://localhost:8000/group`,Grpdata,{headers:{"Authorization":token}});
             if(data){
                 showGroupsfun();
             }
@@ -309,7 +318,7 @@ async function displayUsers (e){
             } 
             console.log(token); 
             try{
-                let {data}= await axios.put(`http://35.153.102.208:8000/group/${editItemIdInput.value}`,Grpdata,{headers:{"Authorization":token}});
+                let {data}= await axios.put(`http://localhost:8000/group/${editItemIdInput.value}`,Grpdata,{headers:{"Authorization":token}});
                 if(data){
                     showGroupsfun();
                 }
@@ -336,7 +345,7 @@ async function displayUsers (e){
 //      } 
 //      console.log(token); 
 //     try{
-//         let {data}= await axios.post(`http://35.153.102.208:8000/group`,Grpdata,{headers:{"Authorization":token}});
+//         let {data}= await axios.post(`http://localhost:8000/group`,Grpdata,{headers:{"Authorization":token}});
 //         if(data){
 //             showGroupsfun();
 //         }

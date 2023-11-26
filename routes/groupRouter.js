@@ -10,6 +10,7 @@ const {authenticate}=require('../middleware/authentication.js');
 
 
 
+
 router.get('/',authenticate,chatController.getGroups);
 
 router.get('/:id',authenticate,chatController.getEditGroup);

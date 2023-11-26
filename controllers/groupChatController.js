@@ -2,7 +2,7 @@ const grpChatModel=require('../models/GropChat');
 const groupModel = require('../models/Group.js');
 const userModel = require('../models/User.js');
 const Sequelize = require('sequelize');
-
+const AWS = require('aws-sdk');
 
 const getgrpMessages = async (req,res,next)=>{
 
@@ -60,8 +60,55 @@ const createGrpMessage =async (req, res, next) => {
 }
 
 
+const uploadToS3 =(data,filename)=>{
+   
+    const BUCKET_NAME ='e-track123';
+    // const userKey =process.env.IAM_USER_KEY;
+    // const userSecret=process.env.IAM_USER_SECRET;
+
+    let s3bucket = new AWS.S3({
+        accessKeyId:process.env.IAM_USER_KEY,
+        secretAccessKey:process.env.IAM_USER_SECRET,
+        Bucket : BUCKET_NAME
+    })
+    var params ={
+        Bucket : BUCKET_NAME,
+        Key:filename,
+        Body:data,
+        ACL:'public-read'
+    }
+    return new Promise ((resolve,reject)=>{
+        s3bucket.upload(params,(err,data)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(data.Location)
+              
+            }
+        })
+    })
+}
+
+const fileUpload =async (req, res, next) => {
+  try{
+    const user = req.user;
+    const image = req.file;
+    const { GroupId } = req.body;
+    const filename = `chat-images/group${GroupId}/user${req.user.id}/${Date.now()}_${image.originalname}`;
+    const imageUrl = await uploadToS3(image.buffer, filename)
+    // console.log(recFile);
+    // console.log(GroupId);
+    await user.createGropChat({
+        message:imageUrl,isImage:true,GroupId,
+    })
+    return res.status(200).json({ message: "image saved to database succesfully" })
+  }catch(err){
+    console.log(err);
+  }
+}
 
 module.exports={
     getgrpMessages,
-    createGrpMessage
+    createGrpMessage,
+    fileUpload
 }

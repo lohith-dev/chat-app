@@ -60,6 +60,16 @@
                 height: 82vh;
                 background-color:blanchedalmond;
             }
+            .attach-file{
+                display: none;
+            }
+            .attach{
+                padding: 0px 6px;
+                cursor: pointer;
+            }
+            .attach-icon{
+                font-size: 25px;
+            }
             #editicon{
                 position: absolute;
                 right: 20px;
@@ -85,6 +95,11 @@
             .userlist{
                 position: relative;
             }
+            .chat-image{
+                height: 10rem;
+                width: 14rem;
+                object-fit: cover;
+            }
           
             .userlist > input[type="checkbox"] {
                     /* CSS properties for the checkbox */
@@ -105,6 +120,13 @@
       
          <script>
 
+        function isNotImageFile(url) {
+            const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif']; // List of common image file extensions
+            const fileExtension = url.substring(url.lastIndexOf('.')).toLowerCase();
+
+            return !imageExtensions.includes(fileExtension);
+        }
+
          const display=(data)=>{
                 const parentDiv = document.getElementById('chatmessage');
                 parentDiv.innerHTML='';
@@ -124,17 +146,31 @@
                         // console.log(ele.userId == tokenData.id,ele.userId,tokenData.id);
                             if (ele.UserId == tokenData.id) {
                                 if(ele.isImage){
-                                    messageText+=`      
-                                <div class="col-12 mb-2 pe-0">
-                                    <div class="card p-2 float-end rounded-4 self-chat-class">
-                                        <p class="text-primary my-0"><small>${ele.User.name}</small></p>
-                                        <a href="${ele.message}" target="_blank">
-                                        <img src="${ele.message}" class="chat-image">
-                                        </a>
-                                        <small class="text-muted text-end">${formattedDate}</small>
-                                    </div>
-                                </div>
+                                    console.log(isNotImageFile(ele.message));
+                                    if(!isNotImageFile(ele.message)){
+                                                messageText+=`      
+                                        <div class="col-12 mb-2 pe-0">
+                                            <div class="card p-2 float-end rounded-4 self-chat-class">
+                                                <p class="text-primary my-0"><small>${ele.User.name}</small></p>
+                                                <a href="${ele.message}" target="_blank">
+                                                <img src="${ele.message}" class="chat-image">
+                                                </a>
+                                                <small class="text-muted text-end">${formattedDate}</small>
+                                            </div>
+                                        </div>
                                     `
+                                    }else{
+                                        messageText+=`      
+                                        <div class="col-12 mb-2 pe-0">
+                                            <div class="card p-2 float-end rounded-4 self-chat-class">
+                                                <p class="text-primary my-0"><small>${ele.User.name}</small></p>
+                                                <a href="${ele.message}" >${ele.message}</a>
+                                                <small class="text-muted text-end">${formattedDate}</small>
+                                            </div>
+                                        </div>
+                                    `
+                                    }
+                                 
                                 }else{
                                     messageText += `                            
                                     <div class="col-12 mb-2 pe-0">
@@ -225,8 +261,12 @@
                         }
                         form.classList.add('was-validated')
                     })
-            
-                    
+                  
+                    document.getElementById('contained-button-file').addEventListener('change',()=>{
+                        const file=document.getElementById('contained-button-file').files[0];
+                        document.getElementById("fileId").value = "file"
+                         console.log(file);
+                    })
                     // console.log(document.querySelector(".grpItem"));
                         document.getElementById('logout').addEventListener('click',()=>{
                             localStorage.removeItem('token');
@@ -238,23 +278,39 @@
                 event.preventDefault(); 
 
                 const msg = document.getElementById('chatmsg').value;
-                console.log(msg);
+        
                 const chatsubmit = document.getElementById('sub-button');
                 const itemId = chatsubmit.getAttribute('data-id');
-                console.log(itemId);
-
+               
+                    const isfilUpload=document.getElementById("fileId").value;
+                     const file=document.getElementById('contained-button-file').files[0]
+                    // console.log(document.getElementById('contained-button-file').files[0]);
+               
                 let msgData ={
                         message:msg,
                         groupId:itemId
                 }
                         if(itemId){ 
-                            
-                            try{
-                            let data= await axios.post(`http://localhost:8000/grpchat`,msgData,{headers:{"Authorization":token}});
-                            socket.emit('new-group-message')
-                            }catch(err){
-                                showError(err.response.data.message)
-                            }
+                           if(isfilUpload){
+                            console.log("ddddddddddddddd");
+                            const formData = new FormData();
+                            formData.append('image', file);
+                            formData.append('GroupId',itemId)
+                                try{
+                                    let data= await axios.post(`http://localhost:8000/grpchat/fileUpload`,formData,{headers:{"Authorization":token}});
+                                    socket.emit('new-group-message')
+                                    }catch(err){
+                                        showError(err.response.data.message)
+                                }
+                           } else{
+                                try{
+                                    let data= await axios.post(`http://localhost:8000/grpchat`,msgData,{headers:{"Authorization":token}});
+                                    socket.emit('new-group-message')
+                                    }catch(err){
+                                        showError(err.response.data.message)
+                                    }
+                           }
+                           
                         }else{
                             
                             try{
@@ -337,6 +393,7 @@
                                         </ul>
                                        </div>
                                        <input type="hidden" id="editGroupId"  name="editGroupId">
+                                 
                                     </div>
                                     <div class="modal-footer">
                                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -372,6 +429,18 @@
                                              <input type="email" class="form-control" id="chatmsg" aria-describedby="emailHelp" placeholder="Enter the message">
                                              <!-- <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small> -->
                                          </div>
+                                         <input
+                                         type="file"
+                                         id="contained-button-file"
+                                         class="attach-file"
+                                        />
+                                        <input type="hidden" id="fileId"  name="filesel">
+                                         <label for="contained-button-file" class="attach">
+                                            <!-- <Fab component="span"  sx={{position:'absolute', top:'5px',right:'0px'}} >
+                                              <AddPhotoAlternateIcon sx={{color:'#0d47a1',fontSize:'25px'}} />
+                                            </Fab> -->
+                                            <i class="bi bi-paperclip attach-icon"></i>
+                                          </label> 
                                          <input type="submit"  id ="sub-button" class="subut" value="Send">
                                    
                                     </div>

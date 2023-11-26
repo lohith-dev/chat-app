@@ -365,6 +365,8 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('group-btn').addEventListener('click',createGroup);
 
     document.getElementById('showGroupsList').addEventListener('click',showGroupChat)
+
+  
   
     
 

@@ -1,15 +1,15 @@
-const socket = io("http://localhost:8000");
-    console.log(window.location.origin);
+const socket = io(window.location.origin);
+   
     socket.on('connect', () => {
-         console.log(`You connected with id:${socket.id}`);
+        //  console.log(`You connected with id:${socket.id}`);
 
     })
     socket.on('common-message', () => {
-        console.log("commonnnnnnnnnnnnnnnnnnnnnnnn");
+   
         showChatHistory();
     })
     socket.on('group-message', () => {
-        console.log("groupppppppppppppppppppppppp");
+        
         showgrpChatHelper()
     })
 

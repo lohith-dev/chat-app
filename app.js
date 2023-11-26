@@ -19,7 +19,8 @@ const errorController = require('./controllers/error');
 const msgRouter = require('./routes/msgRouter.js');
 const grouppRouter = require('./routes/groupRouter.js');
 const grpchatRouter = require('./routes/groupChatRouter.js');
-
+const cronService = require('./services/cron.js');
+cronService.job.start();
 
 
 app.use(cors({
@@ -48,7 +49,7 @@ const httpServer = createServer(app);
 
  const io = new Server(httpServer, {
     cors: {
-      origin: ["null","https://admin.socket.io"],
+      origin: ["https://admin.socket.io",],
       credentials: true
     }
   });

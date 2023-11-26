@@ -38,7 +38,7 @@ const createMessage =async (req, res, next) => {
     try {
       
         const {message}=req.body;
-        console.log(req.user.id);
+
         const data= await msgModel.create({
             message,isImage:false,UserId:req.user.id
         })

@@ -6,7 +6,7 @@ const getGroups = async (req, res, next) => {
   
     try {
         const user=req.user;
-        console.log(user);
+     
         const data = await userModel.findAll({
             where: { id: user.id },
             attributes:['id', 'name'],
@@ -100,7 +100,7 @@ const creatGroups = async (req, res, next) => {
 
     try {
         const {name,numberOfMembers,membersIds}=req.body;
-        console.log(req.body);
+   
         const group = await groupModel.create({
             name,numberOfMembers,AdminId:req.user.id
         });

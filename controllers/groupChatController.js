@@ -8,13 +8,13 @@ const getgrpMessages = async (req,res,next)=>{
 
     try {
         const lastTimestamp = req.query.timestamp || 0;
-        console.log(lastTimestamp);
+       
         const {id}=req.params;
-        console.log(id);
-        console.log(lastTimestamp);
+  
+
         const group = await groupModel.findOne({where:{id:id}});
 
-        console.log(group);
+      
         
         const chatHistories = await group.getGropChats({
             where: {
@@ -41,7 +41,7 @@ const getgrpMessages = async (req,res,next)=>{
 
 const createGrpMessage =async (req, res, next) => {
 
-    console.log(req.body);
+
         try {
             const user = req.user;
             const { message, groupId } = req.body;
@@ -96,8 +96,7 @@ const fileUpload =async (req, res, next) => {
     const { GroupId } = req.body;
     const filename = `chat-images/group${GroupId}/user${req.user.id}/${Date.now()}_${image.originalname}`;
     const imageUrl = await uploadToS3(image.buffer, filename)
-    // console.log(recFile);
-    // console.log(GroupId);
+  
     await user.createGropChat({
         message:imageUrl,isImage:true,GroupId,
     })

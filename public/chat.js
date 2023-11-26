@@ -30,7 +30,7 @@ async function showgrpChatHelper(){
     const chats = localStorage.getItem('chatHistory');
     const localGrpId=JSON.parse(localStorage.getItem('groupId'));
     const grpId = parseInt(localGrpId);
-    console.log(grpId);
+   
     try{
         if(JSON.parse(localStorage.getItem('groupId'))){
             const parsedChatHistory = JSON.parse(chats);
@@ -54,7 +54,7 @@ async function showgrpChatHelper(){
 
 async function checkAdmin(itemId){
     const tokenData = parseJwt(tokenjwt);
-    console.log("tokenn",tokenData);
+
     try{
         const {data} = await axios.get(`http://35.153.102.208:8000/group/${itemId}?admin=${true}`,{headers:{"Authorization":tokenjwt}});
       
@@ -147,7 +147,7 @@ async function editGroup(e){
 async function showGroupChat(e){
     const listItem = e.target.closest('li');
     const itemId = listItem.getAttribute('id');
-    console.log(listItem);
+  
     const chatsubmit = document.getElementById('sub-button');  
     const grouptitle = document.getElementById('titleheader');
     chatsubmit.setAttribute('data-id',itemId);
@@ -282,12 +282,12 @@ async function displayUsers (e){
   async function createGroup(){
 
     const editItemIdInput = document.getElementById('editGroupId');
-   console.log("asds",editItemIdInput.value );
+   
 
    if(!editItemIdInput.value){
         const groupname= document.getElementById('groupName').value;
         const user_list = document.getElementById('showUsers')
-        console.log(user_list);
+       
         const groupUsers = Array.from(user_list.querySelectorAll('input[name="users"]:checked')).map(checkbox => checkbox.value);
     
         const Grpdata = {
@@ -308,7 +308,7 @@ async function displayUsers (e){
    }else{
             const groupname= document.getElementById('groupName').value;
             const user_list = document.getElementById('showUsers')
-            console.log(user_list);
+            
             const groupUsers = Array.from(user_list.querySelectorAll('input[name="users"]:checked')).map(checkbox => checkbox.value);
 
             const Grpdata = {
@@ -316,7 +316,7 @@ async function displayUsers (e){
                 numberOfMembers: groupUsers.length + 1,
                 membersIds: groupUsers
             } 
-            console.log(token); 
+           
             try{
                 let {data}= await axios.put(`http://35.153.102.208:8000/group/${editItemIdInput.value}`,Grpdata,{headers:{"Authorization":token}});
                 if(data){

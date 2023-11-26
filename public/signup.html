@@ -130,7 +130,7 @@
                         let edit=null;
                         axios.get('http://35.153.102.208:8000/expenseData').then((res)=>{
                             edit=res.data.data.find(data=>data.id==itemId);
-                            console.log(edit);
+                     
                              populateInputFields(edit);
                             }).catch((err)=>{
 

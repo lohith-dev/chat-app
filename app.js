@@ -38,7 +38,7 @@ app.use('/group',grouppRouter)
 app.use('/grpchat',grpchatRouter)
 
 app.use((req,res)=>{
-    console.log("reqqqq");
+    
     res.sendFile(path.join(__dirname,`public${req.url}`))
 })
 
